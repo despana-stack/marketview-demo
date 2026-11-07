@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0E2A36">
+<meta name="robots" content="noindex">
+<title>MarketView Demo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: banda superior azul petróleo con el menú (en celular, barra inferior); cada módulo ocupa el área restante.
+   Empresa ficticia «Calixa Materiales». Paleta propia (no es la de Duracreto): petróleo, menta, coral. */
+:root{
+  --navy:#0E2A36; --navy2:#16394A; --mint:#2EC4A6; --mint-ink:#0B7A66; --coral:#FF7A59; --sand:#F2B544;
+  --bg:#F3F6F7; --surface:#FFFFFF; --surface2:#E8EEF0; --fg:#10232C; --muted:#5B6E77; --line:#D3DEE2;
+  --ok:#1E9E6A; --ok-bg:#E1F4EC; --warn:#B7791F; --warn-bg:#FCF0D9; --bad:#D2483A; --bad-bg:#FBE4E1;
+  --e-ganado:#1E9E6A; --e-persp:#2B8FD6; --e-comp:#D2483A; --e-perdido:#8C99A0;
+  --sea:#DCEBF0; --land:#F7FAF8; --land-line:#B9CCD3;
+  --display:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  --body:'Figtree',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --r:14px; --top-h:calc(58px + env(safe-area-inset-top,0px)); --nav-h:calc(64px + env(safe-area-inset-bottom,0px));
+  --sombra:0 1px 2px rgba(14,42,54,.06),0 8px 24px rgba(14,42,54,.07);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B1A21; --surface:#12252E; --surface2:#1A313C; --fg:#E7F0F2; --muted:#93A8B0; --line:#26414D;
+  --mint-ink:#5FE0C4; --ok:#4CCB93; --ok-bg:#12352A; --warn:#F0B755; --warn-bg:#3A2C12; --bad:#F27466; --bad-bg:#3D1C19;
+  --e-ganado:#4CCB93; --e-persp:#5BAEF0; --e-comp:#F27466; --e-perdido:#7F8E95;
+  --sea:#0F2732; --land:#163440; --land-line:#2C5363; --sombra:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1A21; --surface:#12252E; --surface2:#1A313C; --fg:#E7F0F2; --muted:#93A8B0; --line:#26414D;
+  --mint-ink:#5FE0C4; --ok:#4CCB93; --ok-bg:#12352A; --warn:#F0B755; --warn-bg:#3A2C12; --bad:#F27466; --bad-bg:#3D1C19;
+  --e-ganado:#4CCB93; --e-persp:#5BAEF0; --e-comp:#F27466; --e-perdido:#7F8E95;
+  --sea:#0F2732; --land:#163440; --land-line:#2C5363; --sombra:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3); color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.45;overscroll-behavior:none}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--navy)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- Login ---------- */
+.login{min-height:100%;display:grid;place-items:center;padding-block:32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:radial-gradient(90% 60% at 20% 0%,#1D4E5F 0%,var(--navy) 55%,#08181F 100%)}
+.login-card{width:100%;max-width:400px;background:var(--surface);border-radius:22px;padding:28px 24px 22px;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.logo-mark{width:46px;height:46px;flex:none}
+.logo b{display:block;font-family:var(--display);font-size:22px;line-height:1.05}
+.logo b span{color:var(--mint-ink)}
+.logo small{display:block;color:var(--muted);font-size:12.5px}
+.campo{display:block;margin-bottom:14px}
+.campo>span{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px}
+.inp{width:100%;height:44px;border:1.5px solid var(--line);border-radius:11px;background:var(--surface);padding:0 13px;font-size:15px}
+.inp:focus{outline:none;border-color:var(--mint);box-shadow:0 0 0 3px color-mix(in srgb,var(--mint) 25%,transparent)}
+select.inp{padding-right:30px}
+textarea.inp{height:auto;min-height:70px;padding:10px 13px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border-radius:11px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;font-size:14px;color:var(--fg);text-decoration:none;white-space:nowrap}
+.btn:hover{background:var(--surface2)}
+.btn.pri{background:var(--mint);border-color:var(--mint);color:#06231D}
+.btn.pri:hover{filter:brightness(.95)}
+.btn.sm{height:32px;padding:0 11px;font-size:12.5px;border-radius:9px}
+.btn.ancho{width:100%;height:46px;font-size:15px}
+.btn[disabled]{opacity:.5;cursor:default}
+.err{background:var(--bad-bg);color:var(--bad);border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:12px}
+.demo-tag{display:inline-block;background:color-mix(in srgb,var(--coral) 18%,transparent);color:var(--coral);font-weight:700;font-size:11px;letter-spacing:.6px;text-transform:uppercase;border-radius:999px;padding:3px 9px}
+.login .pie{margin:14px 0 0;font-size:12px;color:var(--muted);text-align:center}
+
+/* ---------- Encabezado y menú ---------- */
+.top{position:fixed;top:0;left:0;right:0;height:var(--top-h);padding-top:env(safe-area-inset-top,0px);padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px));
+  background:var(--navy);color:#E7F0F2;display:flex;align-items:center;gap:12px;z-index:40}
+.marca{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.marca svg{width:32px;height:32px;flex:none}
+.marca b{font-family:var(--display);font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.marca .app{display:none}
+.marca .tag{font-size:10px;margin-left:2px}
+.yo{width:38px;height:38px;border-radius:50%;border:2px solid #2C5363;background:var(--mint);color:#06231D;font-weight:800;font-size:13px;flex:none}
+.nav{position:fixed;left:0;right:0;bottom:0;height:var(--nav-h);padding-bottom:env(safe-area-inset-bottom,0px);background:var(--surface);border-top:1px solid var(--line);display:flex;z-index:40}
+.nav button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-size:11px;font-weight:600;min-width:0}
+.nav .ic{display:grid;place-items:center;width:52px;height:28px;border-radius:14px}
+.nav svg{width:21px;height:21px}
+.nav button[aria-current="page"]{color:var(--fg)}
+.nav button[aria-current="page"] .ic{background:var(--mint);color:#06231D}
+#main{position:fixed;top:var(--top-h);left:0;right:0;bottom:var(--nav-h)}
+.mod{position:absolute;inset:0;overflow:auto}
+.mod.pad{padding-block:18px 28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+@media (min-width:1024px){
+  .marca{flex:none}.marca .app{display:inline}.marca .mod-t{display:none}
+  .nav{position:static;height:auto;padding:0;background:none;border:0;flex:1;justify-content:center;gap:4px}
+  .nav button{flex:none;flex-direction:row;gap:8px;height:38px;padding:0 15px;border-radius:19px;font-size:13.5px;font-weight:500;color:#A9C0C8}
+  .nav .ic{width:auto;height:auto;background:none!important;color:inherit}
+  .nav svg{width:18px;height:18px}
+  .nav button:hover{background:var(--navy2);color:#fff}
+  .nav button[aria-current="page"]{background:var(--mint);color:#06231D;font-weight:700}
+  .top-acc{min-width:150px;display:flex;justify-content:flex-end}
+  #main{bottom:0}
+}
+.wrap{max-width:1180px;margin:0 auto}
+.cab{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.cab h1{font-size:24px}
+.cab p{margin:2px 0 0;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sombra)}
+
+/* ---------- Menú de usuario, avisos ---------- */
+.capa{position:fixed;inset:0;background:rgba(5,15,20,.45);z-index:70}
+.menu{position:fixed;z-index:71;right:12px;top:calc(var(--top-h) + 6px);width:min(320px,calc(100% - 24px));background:var(--surface);border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.3);padding:8px}
+.menu-h{padding:12px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.menu-h b{display:block;font-size:15px}
+.menu-h small{color:var(--muted)}
+.mi{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:left;padding:11px 12px;border-radius:10px}
+.mi:hover{background:var(--surface2)}
+.mi .st{margin-left:auto;font-size:12px;color:var(--muted)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + 14px);z-index:80;background:var(--navy);color:#fff;border-radius:12px;padding:11px 16px;font-size:13.5px;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+@media (min-width:1024px){.toast{bottom:22px}}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;background:var(--surface2);color:var(--fg);border:1px solid transparent}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+.est-Sinestado{--c:var(--e-perdido)}
+.est-Ganado{--c:var(--e-ganado)}.est-Perspectiva{--c:var(--e-persp)}.est-Competencia{--c:var(--e-comp)}.est-Perdido{--c:var(--e-perdido)}
+.chip.est{background:color-mix(in srgb,var(--c) 15%,transparent);color:var(--c)}
+.chip.est .dot{background:var(--c)}
+
+/* ---------- Mapa ---------- */
+.mapa{position:absolute;inset:0;background:var(--sea);overflow:hidden;touch-action:none}
+.mapa svg.lienzo{width:100%;height:100%;display:block;cursor:grab}
+.mapa svg.lienzo.arrastra{cursor:grabbing}
+.panel{position:absolute;left:12px;top:12px;bottom:12px;width:290px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sombra);display:flex;flex-direction:column;transition:transform .28s ease;z-index:5}
+.panel.oculto{transform:translateX(calc(-100% - 14px))}
+.panel-h{padding:14px 14px 10px;border-bottom:1px solid var(--line)}
+.panel-h h2{font-size:16px;margin-bottom:8px}
+.panel-b{overflow:auto;padding:6px 6px 10px;flex:1}
+.pestana{position:absolute;top:50%;right:-34px;transform:translateY(-50%);width:34px;height:64px;border:1px solid var(--line);border-left:0;border-radius:0 12px 12px 0;background:var(--surface);display:grid;place-items:center;box-shadow:var(--sombra);color:var(--muted)}
+.pestana svg{width:16px;height:16px;transition:transform .2s}
+.panel.oculto .pestana svg{transform:rotate(180deg)}
+.acc{border-bottom:1px solid var(--line)}
+.acc>button{width:100%;display:flex;align-items:center;justify-content:space-between;border:0;background:none;padding:12px 10px;font-weight:700;font-size:13.5px}
+.acc>button svg{width:14px;height:14px;transition:transform .2s;color:var(--muted)}
+.acc[data-abierto="0"]>button svg{transform:rotate(-90deg)}
+.acc[data-abierto="0"]>.acc-b{display:none}
+.acc-b{padding:0 10px 12px;display:grid;gap:8px}
+.chk{display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer}
+.chk input{width:16px;height:16px;accent-color:var(--mint-ink)}
+.chk .cnt{margin-left:auto;color:var(--muted);font-size:12px}
+.sw-plant{width:12px;height:12px;border-radius:3px;flex:none}
+.zoom{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:12px;display:grid;gap:6px;z-index:4}
+.zoom button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:18px;font-weight:700;box-shadow:var(--sombra)}
+.leyenda{position:absolute;right:max(12px,env(safe-area-inset-right,0px));bottom:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;display:flex;gap:12px;flex-wrap:wrap;font-size:12px;box-shadow:var(--sombra);z-index:4;max-width:calc(100% - 24px)}
+.leyenda span{display:inline-flex;align-items:center;gap:6px}
+.ficha{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:60px;width:300px;max-width:calc(100% - 24px);z-index:6;padding:16px}
+.ficha h3{font-size:17px;margin:6px 0 2px}
+.ficha .x{position:absolute;right:8px;top:8px;border:0;background:none;font-size:20px;color:var(--muted);width:32px;height:32px}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:12px 0;font-size:13px}
+.dl dt{color:var(--muted)}.dl dd{margin:0;font-weight:600}
+.meses{display:flex;align-items:flex-end;gap:3px;height:46px;margin:6px 0 12px}
+.meses i{flex:1;background:color-mix(in srgb,var(--mint) 60%,transparent);border-radius:2px 2px 0 0}
+.mk-label{font-family:var(--body);font-size:12px;font-weight:700;fill:var(--fg);paint-order:stroke;stroke:var(--land);stroke-width:4px;stroke-linejoin:round}
+.mk-zona{font-family:var(--display);font-size:22px;font-weight:800;fill:var(--muted);opacity:.28;letter-spacing:3px}
+.mk-proy{cursor:pointer;transition:r .15s}
+.mk-proy.sel{stroke:var(--fg);stroke-width:3}
+.ver-filtros{display:none}
+@media (max-width:760px){
+  .panel{left:0;right:0;top:auto;bottom:0;width:auto;max-height:62%;border-radius:18px 18px 0 0}
+  .panel.oculto{transform:translateY(calc(100% - 52px))}
+  .pestana{display:none}
+  .ver-filtros{display:flex;width:100%;justify-content:center;border:0;background:none;padding:6px 0 0}
+  .ver-filtros i{width:42px;height:5px;border-radius:3px;background:var(--line)}
+  .ficha{left:12px;right:12px;width:auto;top:12px}
+  .leyenda{display:none}
+}
+</style>
+<style>
+/* ---------- Mis proyectos ---------- */
+.filtros{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.filtros .inp{width:auto;min-width:0;height:38px;font-size:13.5px}
+.filtros input.inp{flex:1 1 200px}
+.resumen{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.resumen .card{padding:12px 14px}
+.resumen small{display:block;color:var(--muted);font-size:12px}
+.resumen b{font-family:var(--display);font-size:22px}
+.lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.pcard{padding:14px;display:flex;flex-direction:column;gap:8px}
+.pcard h3{font-size:15.5px;line-height:1.25}
+.pcard .sub{color:var(--muted);font-size:12.5px}
+.pcard .fila{display:flex;gap:14px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.pcard .fila b{color:var(--fg)}
+.estados{display:flex;gap:6px;flex-wrap:wrap}
+.estados button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--muted)}
+.estados button.on{background:color-mix(in srgb,var(--c) 16%,transparent);border-color:var(--c);color:var(--c)}
+.pcard .acc-p{display:flex;gap:8px;margin-top:2px}
+.dlg{position:fixed;z-index:72;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100% - 24px));max-height:calc(100% - 40px);overflow:auto;background:var(--surface);border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.35);padding:20px}
+.dlg h2{font-size:19px;margin-bottom:4px}
+.dlg p.sub{margin:0 0 14px;color:var(--muted);font-size:13px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.dlg .pie-d{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+@media (max-width:640px){.resumen{grid-template-columns:repeat(2,minmax(0,1fr))}.g2{grid-template-columns:1fr}}
+
+/* ---------- Precios ---------- */
+.tabs{display:flex;gap:4px;background:var(--surface2);border-radius:12px;padding:4px;width:max-content;max-width:100%;overflow-x:auto}
+.tabs button{border:0;background:none;border-radius:9px;padding:7px 14px;font-weight:600;font-size:13px;color:var(--muted);white-space:nowrap}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:var(--sombra)}
+.tabla-w{overflow-x:auto;margin-top:14px}
+table.comp{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;min-width:720px}
+.comp th,.comp td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.comp th{font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;background:var(--surface)}
+.comp th:first-child,.comp td:first-child{text-align:left;position:sticky;left:0;background:var(--surface);z-index:1}
+.comp td.propio{background:color-mix(in srgb,var(--mint) 10%,var(--surface));font-weight:700}
+.comp .d{display:block;font-size:11px;font-weight:700}
+.d.up{color:var(--ok)}.d.dn{color:var(--bad)}.d.eq{color:var(--muted)}
+.comp .nuevo{background:color-mix(in srgb,var(--sand) 25%,transparent)}
+.nota{font-size:12px;color:var(--muted);margin-top:10px}
+.hist{display:grid;gap:10px;margin-top:14px}
+.hcard{padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:4px 14px;align-items:center}
+.hcard b{font-size:14px}
+.hcard .sub{color:var(--muted);font-size:12.5px}
+.hcard .pr{text-align:right;font-family:var(--display);font-size:18px}
+.hcard .pr small{display:block;font-family:var(--body);font-size:11.5px;font-weight:700}
+.reg{padding:18px;max-width:680px}
+.chat-fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(var(--nav-h) + 16px);width:52px;height:52px;border-radius:50%;border:0;background:var(--navy);color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.25);z-index:30;display:grid;place-items:center}
+.chat-fab svg{width:24px;height:24px}
+@media (min-width:1024px){.chat-fab{bottom:22px}}
+.chat{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(var(--nav-h) + 78px);width:min(340px,calc(100% - 32px));height:400px;max-height:calc(100% - var(--top-h) - var(--nav-h) - 100px);z-index:31;display:flex;flex-direction:column;overflow:hidden}
+@media (min-width:1024px){.chat{bottom:84px}}
+.chat-h{background:var(--navy);color:#fff;padding:12px 14px;font-weight:700}
+.chat-h small{display:block;font-weight:400;color:#A9C0C8;font-size:12px}
+.chat-m{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.bur{max-width:85%;padding:8px 11px;border-radius:12px;font-size:13px;background:var(--surface2)}
+.bur.yo{align-self:flex-end;background:var(--mint);color:#06231D}
+.chat form{display:flex;gap:6px;padding:8px;border-top:1px solid var(--line)}
+
+/* ---------- Variables que espera el módulo del mapa ---------- */
+:root{--yellow:var(--mint);--orange:var(--coral);--ink:var(--navy);--font:var(--body);--accent:var(--mint);--accent-ink:var(--mint-ink)}
+.mv-giro{width:18px;height:18px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:mvg .7s linear infinite;display:inline-block}
+@keyframes mvg{to{transform:rotate(360deg)}}
+.mv-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;color:var(--fg)}
+/* ---------- Dashboard ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.kpi{padding:14px 16px}
+.kpi small{display:block;color:var(--muted);font-size:12px;font-weight:600}
+.kpi b{display:block;font-family:var(--display);font-size:26px;margin:2px 0}
+.kpi .var{font-size:12px;font-weight:700}
+.var.up{color:var(--ok)}.var.dn{color:var(--bad)}
+.kpi svg{width:100%;height:30px;display:block;margin-top:6px}
+.grid-d{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px}
+.panel-d{padding:16px;min-width:0}
+.panel-d h2{font-size:15px;margin-bottom:2px}
+.panel-d .sub{color:var(--muted);font-size:12.5px;margin:0 0 10px}
+.panel-d svg{width:100%;display:block}
+.ley{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}
+.ley span{display:inline-flex;align-items:center;gap:6px}
+.ley i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.ax{font-size:11px;fill:var(--muted);font-family:var(--body)}
+.gr{stroke:var(--line);stroke-width:1}
+.rank{display:grid;gap:9px}
+.rank-f{display:grid;grid-template-columns:110px 1fr 46px;gap:10px;align-items:center;font-size:12.5px}
+.rank-f .barra{height:10px;border-radius:5px;background:var(--surface2);overflow:hidden;position:relative}
+.rank-f .barra i{position:absolute;inset:0 auto 0 0;border-radius:5px;background:var(--mint)}
+.rank-f .barra::after{content:"";position:absolute;top:-3px;bottom:-3px;left:calc(100%/1.3);width:2px;background:var(--fg);opacity:.35}
+.rank-f b{text-align:right}
+.rank.sin-meta .barra::after{display:none}
+@media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-d{grid-template-columns:1fr}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast" role="status" hidden></div>
+<script src="datos-mapa.js"></script>
+<script>
+(function(){
+'use strict';
+/* =====================================================================
+   MarketView · DEMO con datos ficticios. Empresa, país, ciudades, personas,
+   competidores y cifras son inventados. No se conecta a ningún servidor.
+   ===================================================================== */
+const USUARIO = { id:'andrea.lara', clave:'Calixa2026', nombre:'Andrea Lara', cargo:'Gerente comercial (demo)' };
+const $ = (s,r)=>(r||document).querySelector(s);
+const $$ = (s,r)=>Array.from((r||document).querySelectorAll(s));
+const esc = s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const usd = (n,d)=>'$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:d==null?0:d,maximumFractionDigits:d==null?0:d});
+const mill = n=>'$'+(n/1e6).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' M';
+const fmt = n=>Number(n).toLocaleString('en-US');
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+
+/* ---------- Geografía ficticia (República de Calixa) ---------- */
+const CIUDADES=[
+  {id:'sps',n:'San Pedro Sula',z:'Zona Norte',lat:15.5058,lng:-88.0258},{id:'cho',n:'Choloma',z:'Zona Norte',lat:15.6055,lng:-87.9559},
+  {id:'vil',n:'Villanueva',z:'Zona Norte',lat:15.4008,lng:-88.0045},{id:'pc',n:'Puerto Cortés',z:'Zona Norte',lat:15.8251,lng:-87.9286},
+  {id:'lc',n:'La Ceiba',z:'Zona Norte',lat:15.7698,lng:-86.7928},{id:'ep',n:'El Progreso',z:'Zona Norte',lat:15.4001,lng:-87.8094},
+  {id:'tgu',n:'Tegucigalpa',z:'Zona Centro Sur',lat:14.0607,lng:-87.1825},{id:'com',n:'Comayagua',z:'Zona Centro Sur',lat:14.4512,lng:-87.6375},
+  {id:'ss',n:'San Salvador',z:'El Salvador',lat:13.6929,lng:-89.2182}];
+const CX=Object.fromEntries(CIUDADES.map(c=>[c.id,c]));
+const ZONAS=['Zona Norte','Zona Centro Sur','El Salvador'];
+const EMPRESA='Calixa Materiales';
+const COMPETIDORES=['Cementia','Roca Firme','Mezclas del Norte','Otros'];
+const DM=window.DEMO_MAPA;
+const ASESORES=DM.asesores.filter(a=>a.nombre!=='Andrea Lara').map(a=>({id:a.nombre,n:a.nombre,z:a.zona,col:a.color})).concat([{id:'Andrea Lara',n:'Andrea Lara',z:''}]);
+const AX=Object.assign({'':{id:'',n:'Sin asesor'}},Object.fromEntries(ASESORES.map(a=>[a.id,a])));
+function ciudadCercana(lat,lng){return CIUDADES.reduce((b,c)=>{const d=Math.hypot(c.lat-lat,c.lng-lng);return d<b.d?{c,d}:b},{c:CIUDADES[0],d:1e9}).c}
+function plantaCercana(lat,lng){const ps=DM.plantas.filter(p=>p.tipo==='Propia'&&p.activa==='Sí'&&p.negocios.indexOf('concreto')>=0);return ps.reduce((b,p)=>{const d=Math.hypot(p.lat-lat,p.lng-lng);return d<b.d?{p,d}:b},{p:ps[0],d:1e9}).p.nombre}
+const ESTADOS=['Ganado','Perspectiva','Competencia','Sin estado'];
+const estK=e=>String(e).replace(/\s/g,'');
+const TIPOS=['Vertical','Horizontal','Industrial','Vial','Otro'];
+const MESES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+/* ---------- Proyectos ficticios ---------- */
+function semillaProyectos(){return JSON.parse(JSON.stringify(DM.proyectos))}
+function semillaAsesores(){return JSON.parse(JSON.stringify(DM.asesores))}
+
+/* ---------- Catálogo y precios (USD, sin impuesto) ---------- */
+const IVA=0.12;
+const NEGOCIOS={
+  concreto:{n:'Concreto premezclado',u:'m³',cats:['I · 1–10 m³','II · 11–500 m³','III · 501–1,000 m³','IV · >1,000 m³'],f:[1,.97,.94,.91],
+    p:[['c21',"Concreto f'c 21 MPa",118],['c28',"Concreto f'c 28 MPa",132],['c35',"Concreto f'c 35 MPa",149],['cb28','Bombeable 28 MPa',141]]},
+  bloques:{n:'Bloques y adoquines',u:'unidad',cats:['Precio único'],f:[1],
+    p:[['b10','Bloque 10 cm',0.62],['b15','Bloque 15 cm',0.78],['b20','Bloque 20 cm',0.95],['ad8','Adoquín 8 cm',0.71]]},
+  prefab:{n:'Prefabricados',u:'unidad',cats:['A · 1–50 u','B · 51+ u'],f:[1,.95],
+    p:[['vp6','Viga pretensada 6 m',410],['la','Losa alveolar (m²)',46],['po9','Poste 9 m',225]]},
+  agregados:{n:'Agregados',u:'m³',cats:['Precio único'],f:[1],
+    p:[['g34','Grava 3/4"',24],['ar','Arena lavada',19],['bg','Base granular',15]]}};
+const MERCADOS=['Valle de Sula (SPS)','Tegucigalpa','Puerto Cortés / Omoa','La Ceiba'];
+const PRODX={};Object.entries(NEGOCIOS).forEach(([k,g])=>g.p.forEach(p=>PRODX[p[0]]={id:p[0],n:p[1],base:p[2],neg:k,u:g.u}));
+function semillaPrecios(){ // precio observado por competidor / mercado / producto (factor sobre lista de Calixa)
+  const r=rng(77), m={};
+  MERCADOS.forEach((mk,mi)=>COMPETIDORES.forEach(c=>Object.keys(PRODX).forEach(p=>{
+    const base={'Cementia':.98,'Roca Firme':1.05,'Mezclas del Norte':.95,'Otros':1.0}[c];
+    m[mk+'|'+c+'|'+p]=+(base+(r()-.5)*.09+(mi===1?.02:0)).toFixed(3);
+  })));
+  return m;
+}
+const FACT=semillaPrecios();
+function lista(p,mk,cat){const g=NEGOCIOS[PRODX[p].neg];return PRODX[p].base*(mk==='Puerto Cortés / Omoa'?1.03:mk==='La Ceiba'?1.04:mk==='Tegucigalpa'?1.02:1)*(g.f[cat]||1)}
+function semillaCotizaciones(){
+  const r=rng(5150), out=[], F=['Cotización','Cliente (verbal)','Licitación','Factura / orden de compra'];
+  const CL=['Constructora Andina','Grupo Horizonte','Edifica Ltda.','Obras Pacífico','Inmobiliaria Sol','Desarrollos Kappa'];
+  const PR=['Torre Mirador','Bodegas El Roble','Residencial Las Palmas','Colegio Santa Inés','Plaza Vista Real','Hotel Bahía Azul'];
+  const ids=Object.keys(PRODX);
+  for(let i=0;i<18;i++){
+    const p=ids[Math.floor(r()*ids.length)], mk=MERCADOS[Math.floor(r()*4)], c=COMPETIDORES[Math.floor(r()*3)];
+    const g=NEGOCIOS[PRODX[p].neg], cat=Math.floor(r()*g.cats.length);
+    const sin=+(lista(p,mk,cat)*FACT[mk+'|'+c+'|'+p]).toFixed(PRODX[p].base<5?2:1);
+    const d=new Date(2026,10,6-Math.floor(r()*80));
+    out.push({id:'COT-'+(500+i),fecha:d.toISOString().slice(0,10),comp:c,prod:p,mercado:mk,cat,sin,iva:r()<.5,vol:Math.round(g.u==='m³'?20+r()*900:100+r()*4000),
+      cliente:CL[Math.floor(r()*CL.length)],proyecto:PR[Math.floor(r()*PR.length)],fuente:F[Math.floor(r()*F.length)],por:'Equipo comercial'});
+  }
+  return out.sort((a,b)=>b.fecha.localeCompare(a.fecha));
+}
+
+/* ---------- Estado ---------- */
+const K='mvdemo_calixa_hn_v1';
+let DB=store.get(K);
+if(!DB||!DB.proyectos){DB={proyectos:semillaProyectos(),asesores:semillaAsesores(),cots:semillaCotizaciones(),chat:[]}}
+function guardar(){store.set(K,DB)}
+let S=store.get('mvdemo_sesion');
+let actual=null;
+const VISTAS={};
+
+/* ---------- Utilidades de interfaz ---------- */
+let tT=0;function aviso(t){const el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(tT);tT=setTimeout(()=>el.hidden=true,3600)}
+const I={
+  mapa:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>',
+  proyectos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2.5"/><path d="M8 10l2 2 4-4M8 16h8"/></svg>',
+  precios:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12.6V4a1 1 0 0 1 1-1h8.6a1 1 0 0 1 .7.3l7.4 7.4a1 1 0 0 1 0 1.4l-8.6 8.6a1 1 0 0 1-1.4 0L3.3 13.3a1 1 0 0 1-.3-.7z"/><circle cx="8" cy="8" r="1.6"/></svg>',
+  dashboard:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V11M10 20V5M16 20v-7M21 20H3"/></svg>',
+  flecha:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>',
+  abajo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>'};
+const MARCA='<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="12" fill="#16394A"/><path d="M10 34 L20 22 L27 28 L38 14" fill="none" stroke="#2EC4A6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="38" cy="14" r="4" fill="#FF7A59"/><path d="M10 38 H38" stroke="#5B8A99" stroke-width="2.5" stroke-linecap="round"/></svg>';
+const MODS=[{id:'mapa',n:'Mapa',l:'Mapa de mercado'},{id:'proyectos',n:'Mis proyectos',l:'Mis proyectos'},{id:'precios',n:'Precios',l:'Estudio de precios'},{id:'dashboard',n:'Dashboard',l:'Dashboard'}];
+/* =========================== Cascarón =========================== */
+function temaActual(){return document.documentElement.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}
+(function(){const t=store.get('mvdemo_tema');if(t)document.documentElement.dataset.theme=t})();
+
+function login(err){
+  $('#app').innerHTML=`<main class="login"><form class="login-card" id="fLogin" novalidate>
+    <div class="logo"><span class="logo-mark">${MARCA}</span><div><b>Market<span>View</span></b><small>${EMPRESA} · Inteligencia de mercado</small></div></div>
+    <p style="margin:0 0 16px"><span class="demo-tag">Demo · datos ficticios</span></p>
+    ${err?`<div class="err" role="alert">${esc(err)}</div>`:''}
+    <label class="campo"><span>Usuario</span><input class="inp" id="lu" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="nombre.apellido"></label>
+    <label class="campo"><span>Contraseña</span><input class="inp" id="lp" type="password" autocomplete="current-password"></label>
+    <button class="btn pri ancho" type="submit">Ingresar</button>
+    <p class="pie">Versión de demostración. Nada de lo que haga aquí se guarda en un servidor.</p></form></main>`;
+  $('#lu').focus();
+  $('#fLogin').onsubmit=e=>{e.preventDefault();
+    const u=$('#lu').value.trim().toLowerCase(),p=$('#lp').value;
+    if((u===USUARIO.id||u===USUARIO.id+'@calixa.demo')&&p===USUARIO.clave){S={u:USUARIO.id};store.set('mvdemo_sesion',S);app()}
+    else login('Usuario o contraseña incorrectos.')};
+}
+
+function app(){
+  $('#app').innerHTML=`<header class="top">
+      <div class="marca">${MARCA}<b><span class="app">MarketView</span><span class="mod-t" id="tit"></span></b><span class="demo-tag tag">Demo</span></div>
+      <nav class="nav" id="nav" aria-label="Módulos">${MODS.map(m=>`<button data-m="${m.id}" title="${m.l}"><span class="ic">${I[m.id]}</span><em style="font-style:normal">${m.n}</em></button>`).join('')}</nav>
+      <div class="top-acc"><button class="yo" id="yo" aria-label="Menú de usuario">AL</button></div>
+    </header><main id="main"></main>`;
+  $('#nav').onclick=e=>{const b=e.target.closest('[data-m]');if(b)location.hash=b.dataset.m};
+  $('#yo').onclick=menu;
+  ir(location.hash.slice(1)||store.get('mvdemo_mod')||'mapa');
+}
+window.addEventListener('hashchange',()=>{if(S)ir(location.hash.slice(1))});
+
+let PARAMS={};
+function ir(h){
+  const [id0,q]=String(h||'').split('?');let id=id0;PARAMS=Object.fromEntries(new URLSearchParams(q||''));
+  if(!MODS.some(m=>m.id===id))id='mapa';
+  if(location.hash.slice(1).split('?')[0]!==id)history.replaceState(null,'','#'+id);
+  store.set('mvdemo_mod',id);
+  const m=MODS.find(x=>x.id===id);$('#tit').textContent=m.l;
+  $$('#nav [data-m]').forEach(b=>b.dataset.m===id?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'));
+  if(actual&&actual!==id&&VISTAS[actual].ocultar)VISTAS[actual].ocultar();
+  $$('#main>.mod').forEach(s=>s.hidden=true);
+  let el=$('#mod-'+id);
+  if(!el){el=document.createElement('section');el.className='mod';el.id='mod-'+id;$('#main').appendChild(el);VISTAS[id].montar(el)}
+  else if(VISTAS[id].mostrar)VISTAS[id].mostrar(el);
+  el.hidden=false;actual=id;
+  $('#chatFab')&&($('#chatFab').hidden=id!=='precios');if(id!=='precios'&&$('#chat'))$('#chat').hidden=true;
+}
+
+function menu(){
+  cerrarCapas();
+  const dark=temaActual()==='dark';
+  document.body.insertAdjacentHTML('beforeend',`<div class="capa" id="capa"></div><div class="menu" id="menu" role="dialog" aria-label="Menú de usuario">
+    <div class="menu-h"><b>${USUARIO.nombre}</b><small>${USUARIO.cargo}</small><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="chip">Mapa: Editor</span><span class="chip">Precios: Editor</span></div></div>
+    <button class="mi" id="mTema">Modo oscuro<span class="st">${dark?'Activado':'Desactivado'}</span></button>
+    <button class="mi" id="mReset">Restablecer datos de la demo</button>
+    <button class="mi" id="mSalir" style="color:var(--bad)">Cerrar sesión</button></div>`);
+  $('#capa').onclick=cerrarCapas;
+  $('#mTema').onclick=()=>{const n=temaActual()==='dark'?'light':'dark';document.documentElement.dataset.theme=n;store.set('mvdemo_tema',n);cerrarCapas();refrescarTodo()};
+  $('#mReset').onclick=()=>{store.del(K);DB={proyectos:semillaProyectos(),asesores:semillaAsesores(),cots:semillaCotizaciones(),chat:[]};cerrarCapas();refrescarTodo();aviso('Se restablecieron los datos de la demo.')};
+  $('#mSalir').onclick=()=>{store.del('mvdemo_sesion');S=null;cerrarCapas();login()};
+}
+function cerrarCapas(){['#capa','#menu','#dlg'].forEach(s=>{const x=$(s);if(x)x.remove()})}
+function refrescarTodo(){$$('#main>.mod').forEach(s=>s.remove());$('#chat')&&$('#chat').remove();$('#chatFab')&&$('#chatFab').remove();ir(actual||'mapa')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrarCapas()});
+/* =========================== Mapa (módulo real de MarketView, datos de demo) =========================== */
+VISTAS.mapa=(function(){
+  let def=null,carga=null;
+  window.MV={registrar(id,d){if(id==='mapa')def=d}};
+  function cargar(){
+    if(carga)return carga;
+    carga=new Promise((ok,mal)=>{const l=document.createElement('link');l.rel='stylesheet';l.href='mapa/mapa.css';document.head.appendChild(l);
+      const s=document.createElement('script');s.src='mapa/mapa.js';s.onload=()=>def?ok():mal(new Error('mapa'));s.onerror=()=>{carga=null;mal(new Error('red'))};document.body.appendChild(s)});
+    return carga;
+  }
+  function datos(){const d=JSON.parse(JSON.stringify(DM));d.proyectos=JSON.parse(JSON.stringify(DB.proyectos));d.asesores=JSON.parse(JSON.stringify(DB.asesores||DM.asesores));d.leido=new Date().toISOString().slice(0,16).replace('T',' ');return d}
+  function ctx(){return{
+    usuario:{id:USUARIO.id,nombre:USUARIO.nombre,cargo:USUARIO.cargo,roles:{mapa:'editor',proyectos:'editor',precios:'editor',dashboard:'editor'}},rol:'editor',modulo:'mapa',params:Object.assign({},PARAMS),
+    api:async(acc,args)=>{
+      await new Promise(r=>setTimeout(r,250));
+      if(acc==='mapa.cargar')return datos();
+      if(acc==='mapa.moverProyecto'){const p=DB.proyectos.find(x=>x.id===args.id);if(p){p.lat=+args.lat;p.lng=+args.lng;p.aprox='No – ajustada en el mapa (demo)';guardar()}return{datos:datos()}}
+      if(acc==='mapa.guardarGeocerca'){const a=(DB.asesores||[]).find(x=>x.nombre===args.nombre);if(a){a.geocerca=args.puntos&&args.puntos.length?args.puntos:null;guardar()}return{datos:datos()}}
+      const e=new Error('No disponible en la demo.');e.codigo='accion';throw e;
+    },
+    aviso:aviso,abrir:(m,p)=>{p=p||{};if(m==='proyectos'&&p.editar)VISTAS.proyectos.editar=p.editar;const q=new URLSearchParams(p).toString();location.hash=m+(q&&m==='mapa'?'?'+q:'')},
+    tema:temaActual,esCelular:()=>innerWidth<1024,demo:true,version:'demo'}}
+  return{
+    async montar(el){el.innerHTML='<div style="padding:24px;color:var(--muted)">Cargando mapa…</div>';
+      try{await cargar();el.innerHTML='';await def.montar(el,ctx())}catch(e){el.innerHTML='<div style="padding:24px">No se pudo cargar el mapa. Revise la conexión y recargue la página.</div>'}},
+    mostrar(){if(def&&def.mostrar)def.mostrar(ctx())},
+    ocultar(){if(def&&def.ocultar)def.ocultar()}
+  };
+})();
+
+/* =========================== Mis proyectos =========================== */
+VISTAS.proyectos=(function(){
+  let el,f={q:'',asesor:'',est:''};
+  const V={editar:null};
+  function lista(){return DB.proyectos.filter(p=>(!f.asesor||p.asesor===f.asesor)&&(!f.est||p.estado===f.est)&&(!f.q||(p.proyecto+' '+p.cliente+' '+p.zona+' '+(p.planta||'')+' '+p.id).toLowerCase().includes(f.q)))}
+  function pintar(){
+    const ls=lista(),pers=ls.filter(p=>p.estado==='Perspectiva'),gan=ls.filter(p=>p.estado==='Ganado'),cer=ls.filter(p=>p.estado!=='Perspectiva');
+    el.innerHTML=`<div class="wrap">
+      <div class="cab"><div><h1>Mis proyectos</h1><p>Registre proyectos y cambie su estado en un toque.</p></div><button class="btn pri" id="nuevo">+ Nuevo proyecto</button></div>
+      <div class="resumen">
+        <div class="card"><small>Proyectos</small><b class="num">${ls.length}</b></div>
+        <div class="card"><small>En perspectiva</small><b class="num">${fmt(pers.reduce((a,p)=>a+p.vol,0))} m³</b></div>
+        <div class="card"><small>Ganados</small><b class="num">${gan.length}</b></div>
+        <div class="card"><small>Tasa de éxito</small><b class="num">${cer.length?Math.round(gan.length/cer.length*100):0}%</b></div></div>
+      <div class="filtros">
+        <input class="inp" id="pq" placeholder="Buscar proyecto, cliente o ciudad" value="${esc(f.q)}">
+        <select class="inp" id="pa"><option value="">Todos los asesores</option>${ASESORES.map(a=>`<option value="${a.id}" ${f.asesor===a.id?'selected':''}>${a.n}</option>`).join('')}</select>
+        <select class="inp" id="pe"><option value="">Todos los estados</option>${ESTADOS.map(e=>`<option ${f.est===e?'selected':''}>${e}</option>`).join('')}</select></div>
+      <div class="lista">${ls.slice(0,60).map(tarjeta).join('')||'<p style="color:var(--muted)">No hay proyectos con esos filtros.</p>'}</div></div>`;
+    $('#nuevo',el).onclick=()=>dialogo();
+    $('#pq',el).oninput=e=>{f.q=e.target.value.trim().toLowerCase();pintarLista()};
+    $('#pa',el).onchange=e=>{f.asesor=e.target.value;pintar()};
+    $('#pe',el).onchange=e=>{f.est=e.target.value;pintar()};
+    enlazarLista();
+  }
+  function pintarLista(){$('.lista',el).innerHTML=lista().slice(0,60).map(tarjeta).join('')||'<p style="color:var(--muted)">No hay proyectos con esos filtros.</p>';enlazarLista()}
+  function tarjeta(p){
+    return `<article class="card pcard" data-id="${p.id}">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><h3>${esc(p.proyecto)}</h3><div class="sub">${esc(p.cliente)} · ${esc(p.zona)}</div></div><span class="sub num">${p.id}</span></div>
+      <div class="fila"><span>Volumen <b class="num">${fmt(p.vol)} m³</b></span><span>Inicio <b>${p.mes?MESES[+p.mes.slice(5)-1]+' '+p.mes.slice(2,4):'—'}</b></span><span>Asesor <b>${(AX[p.asesor]||AX['']).n.split(' ')[0]}</b></span></div>
+      <div class="estados">${ESTADOS.map(e=>`<button class="est-${estK(e)} ${p.estado===e?'on':''}" data-e="${e}">${e}</button>`).join('')}</div>
+      ${p.comp?`<div class="sub">Competidor: <b style="color:var(--fg)">${p.comp}</b></div>`:''}
+      <div class="acc-p"><button class="btn sm" data-a="mapa">Ver en el mapa</button><button class="btn sm" data-a="editar">Editar</button></div></article>`;
+  }
+  function enlazarLista(){
+    $$('.pcard',el).forEach(c=>{const p=DB.proyectos.find(x=>x.id===c.dataset.id);
+      $$('[data-e]',c).forEach(b=>b.onclick=()=>{const e=b.dataset.e;if(e===p.estado)return;
+        if(e==='Competencia'){pedirCompetidor(p,e);return}
+        p.estado=e;p.comp='';guardar();pintar();aviso(p.proyecto+': ahora está en «'+e+'».')});
+      c.querySelector('[data-a=mapa]').onclick=()=>{location.hash='mapa?id='+p.id};
+      c.querySelector('[data-a=editar]').onclick=()=>dialogo(p);});
+  }
+  function pedirCompetidor(p,e){
+    cerrarCapas();
+    document.body.insertAdjacentHTML('beforeend',`<div class="capa" id="capa"></div><form class="dlg" id="dlg"><h2>¿Con qué competidor?</h2><p class="sub">${esc(p.proyecto)} pasa a «${e}».</p>
+      <label class="campo"><span>Competidor</span><select class="inp" id="dc">${COMPETIDORES.map(c=>`<option>${c}</option>`).join('')}</select></label>
+      <div class="pie-d"><button type="button" class="btn" id="dn">Cancelar</button><button class="btn pri">Guardar</button></div></form>`);
+    $('#capa').onclick=$('#dn').onclick=cerrarCapas;
+    $('#dlg').onsubmit=ev=>{ev.preventDefault();p.estado=e;p.comp=$('#dc').value;guardar();cerrarCapas();pintar();aviso(p.proyecto+': ahora está en «'+e+'».')};
+  }
+  function dialogo(p){
+    cerrarCapas();const n=!p;p=p||{cliente:'',proyecto:'',tipo:'Torre de condominios',vol:'',mes:'2027-01',plazo:6,estado:'Perspectiva',asesor:'Andrea Lara',negocio:'concreto'};
+    const ciu=p.lat!=null?ciudadCercana(p.lat,p.lng).id:'sps';
+    const TIPOS_D=['Losa entrepiso','Pavimento','Bodega','Plaza comercial','Urbanización','Torre de condominios','Nave industrial','Puente'];
+    document.body.insertAdjacentHTML('beforeend',`<div class="capa" id="capa"></div><form class="dlg" id="dlg" novalidate><h2>${n?'Nuevo proyecto':'Editar proyecto'}</h2><p class="sub">${n?'La zona, la planta más cercana y el reparto mensual se calculan solos.':esc(p.id)}</p>
+      <div class="g2"><label class="campo"><span>Cliente</span><input class="inp" id="dCl" value="${esc(p.cliente)}" required></label>
+      <label class="campo"><span>Proyecto</span><input class="inp" id="dPr" value="${esc(p.proyecto)}" required></label>
+      <label class="campo"><span>Tipo</span><select class="inp" id="dTi">${TIPOS_D.concat(TIPOS_D.indexOf(p.tipo)<0&&p.tipo?[p.tipo]:[]).map(t=>`<option ${p.tipo===t?'selected':''}>${esc(t)}</option>`).join('')}</select></label>
+      <label class="campo"><span>Ciudad</span><select class="inp" id="dCi">${CIUDADES.map(c=>`<option value="${c.id}" ${ciu===c.id?'selected':''}>${c.n}</option>`).join('')}</select></label>
+      <label class="campo"><span>Volumen (m³)</span><input class="inp num" id="dVo" type="number" min="1" value="${p.vol}"></label>
+      <label class="campo"><span>Mes de inicio</span><input class="inp" id="dMe" type="month" value="${p.mes}"></label>
+      <label class="campo"><span>Duración (meses)</span><input class="inp num" id="dPl" type="number" min="1" max="36" value="${p.plazo}"></label>
+      <label class="campo"><span>Estado</span><select class="inp" id="dEs">${ESTADOS.map(e=>`<option ${p.estado===e?'selected':''}>${e}</option>`).join('')}</select></label></div>
+      <div id="dErr"></div>
+      <div class="pie-d"><button type="button" class="btn" id="dn">Cancelar</button><button class="btn pri">${n?'Registrar':'Guardar cambios'}</button></div></form>`);
+    $('#capa').onclick=$('#dn').onclick=cerrarCapas;
+    $('#dlg').onsubmit=ev=>{ev.preventDefault();
+      const d={cliente:$('#dCl').value.trim(),proyecto:$('#dPr').value.trim(),tipo:$('#dTi').value,ciudad:$('#dCi').value,vol:+$('#dVo').value,mes:$('#dMe').value||'2027-01',plazo:+$('#dPl').value||6,estado:$('#dEs').value};
+      if(!d.cliente||!d.proyecto||!d.vol){$('#dErr').innerHTML='<div class="err">Complete cliente, proyecto y volumen.</div>';return}
+      const c=CX[d.ciudad];delete d.ciudad;
+      const mover=n||c.id!==ciu,a=Math.random()*6.28,r=.01+Math.random()*.03;
+      if(mover){d.lat=+(c.lat+Math.sin(a)*r).toFixed(5);d.lng=+(c.lng+Math.cos(a)*r).toFixed(5);d.zona=c.z;d.pais=c.z==='El Salvador'?'El Salvador':'Honduras';d.planta=plantaCercana(d.lat,d.lng);d.aprox='Sí – en el centro de '+c.n}
+      const m={};for(let k=0;k<d.plazo;k++){const t=new Date(+d.mes.slice(0,4),+d.mes.slice(5)-1+k,1);m[t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')]=Math.round(d.vol/d.plazo*10)/10}d.m=m;
+      if(n){Object.assign(d,{id:'PRY-'+String(DB.proyectos.length+1).padStart(4,'0'),asesor:'Andrea Lara',comp:'',negocio:'concreto',segmento:'Privado',fuente:'Mis proyectos (demo)'});DB.proyectos.unshift(d)}
+      else Object.assign(p,d);
+      guardar();cerrarCapas();pintar();aviso(n?'Proyecto registrado: '+d.proyecto+'.':'Cambios guardados.')};
+    $('#dCl').focus();
+  }
+  return Object.assign(V,{
+    montar(e){el=e;el.classList.add('pad');pintar();this.abrirPendiente()},
+    mostrar(e){el=e;pintar();this.abrirPendiente()},
+    abrirPendiente(){if(V.editar){const p=DB.proyectos.find(x=>x.id===V.editar);V.editar=null;if(p)dialogo(p)}}
+  });
+})();
+/* =========================== Estudio de precios =========================== */
+VISTAS.precios=(function(){
+  let el,tab='comp',c={neg:'concreto',mk:'San Ciro',cat:1},h={mk:'',comp:''};
+  const dec=p=>PRODX[p].base<5?2:PRODX[p].base<100?2:0;
+  function catDe(p,vol){const n=PRODX[p].neg;if(n==='concreto')return vol<=10?0:vol<=500?1:vol<=1000?2:3;if(n==='prefab')return vol<=50?0:1;return 0}
+  function ultima(comp,p,mk,cat){return DB.cots.find(q=>q.comp===comp&&q.prod===p&&q.mercado===mk&&q.cat===cat&&q.nueva)}
+  function precioComp(comp,p,mk,cat){const q=ultima(comp,p,mk,cat);return q?{v:q.sin,nuevo:true}:{v:lista(p,mk,cat)*FACT[mk+'|'+comp+'|'+p],nuevo:false}}
+  function delta(v,base){const d=(v/base-1)*100;return `<span class="d ${d>0.4?'up':d<-0.4?'dn':'eq'}">${d>0?'+':''}${d.toFixed(1)}%</span>`}
+  function pintar(){
+    el.innerHTML=`<div class="wrap"><div class="cab"><div><h1>Estudio de precios</h1><p>${EMPRESA} contra la competencia, en dólares y sin impuesto (${Math.round(IVA*100)} %).</p></div></div>
+      <div class="tabs" role="tablist">${[['comp','Comparador'],['reg','Registrar cotización'],['hist','Historial']].map(t=>`<button role="tab" data-t="${t[0]}" aria-selected="${tab===t[0]}">${t[1]}</button>`).join('')}</div>
+      <div id="pv"></div></div>`;
+    $$('[data-t]',el).forEach(b=>b.onclick=()=>{tab=b.dataset.t;pintar()});
+    ({comp:comparador,reg:registro,hist:historial})[tab]();
+    chat();
+  }
+  function comparador(){
+    const g=NEGOCIOS[c.neg];if(c.cat>=g.cats.length)c.cat=0;
+    $('#pv',el).innerHTML=`<div class="filtros" style="margin-top:14px">
+        <select class="inp" id="cn">${Object.entries(NEGOCIOS).map(([k,v])=>`<option value="${k}" ${c.neg===k?'selected':''}>${v.n}</option>`).join('')}</select>
+        <select class="inp" id="cm">${MERCADOS.map(m=>`<option ${c.mk===m?'selected':''}>${m}</option>`).join('')}</select>
+        ${g.cats.length>1?`<select class="inp" id="cc">${g.cats.map((x,i)=>`<option value="${i}" ${c.cat===i?'selected':''}>Categoría ${x}</option>`).join('')}</select>`:''}</div>
+      <div class="card tabla-w"><table class="comp num"><thead><tr><th>Producto (${g.u})</th><th>${EMPRESA.split(' ')[0]} · lista</th>${COMPETIDORES.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>
+        ${g.p.map(([id,n])=>{const base=lista(id,c.mk,c.cat);return `<tr><td>${esc(n)}</td><td class="propio">${usd(base,dec(id))}</td>${COMPETIDORES.map(x=>{const r=precioComp(x,id,c.mk,c.cat);return `<td class="${r.nuevo?'nuevo':''}" title="${r.nuevo?'Cotización registrada en esta sesión':'Último precio observado'}">${usd(r.v,dec(id))}${delta(r.v,base)}</td>`}).join('')}</tr>`}).join('')}
+      </tbody></table></div>
+      <p class="nota">Verde: la competencia está más cara que nuestra lista. Rojo: está más barata. Las celdas resaltadas vienen de cotizaciones que usted registró.</p>`;
+    $('#cn',el).onchange=e=>{c.neg=e.target.value;c.cat=0;comparador()};
+    $('#cm',el).onchange=e=>{c.mk=e.target.value;comparador()};
+    const cc=$('#cc',el);if(cc)cc.onchange=e=>{c.cat=+e.target.value;comparador()};
+  }
+  function registro(){
+    const hoy=new Date().toISOString().slice(0,10);
+    $('#pv',el).innerHTML=`<form class="card reg" id="fr" novalidate style="margin-top:14px"><div class="g2">
+      <label class="campo"><span>Fecha</span><input class="inp" id="rf" type="date" value="${hoy}"></label>
+      <label class="campo"><span>Competidor</span><select class="inp" id="rc">${COMPETIDORES.map(x=>`<option>${x}</option>`).join('')}</select></label>
+      <label class="campo"><span>Mercado</span><select class="inp" id="rm">${MERCADOS.map(m=>`<option>${m}</option>`).join('')}</select></label>
+      <label class="campo"><span>Producto</span><select class="inp" id="rp">${Object.entries(NEGOCIOS).map(([k,g])=>`<optgroup label="${g.n}">${g.p.map(p=>`<option value="${p[0]}">${esc(p[1])}</option>`).join('')}</optgroup>`).join('')}</select></label>
+      <label class="campo"><span>Precio unitario (USD)</span><input class="inp num" id="rpr" type="number" step="0.01" min="0" placeholder="0.00"></label>
+      <label class="campo"><span>Volumen</span><input class="inp num" id="rv" type="number" min="1" placeholder="Ej. 120"></label>
+      <label class="campo"><span>Cliente</span><input class="inp" id="rcl" placeholder="Ej. Constructora Andina"></label>
+      <label class="campo"><span>Proyecto</span><input class="inp" id="rpy" placeholder="Ej. Torre Mirador"></label>
+      <label class="campo"><span>Fuente</span><select class="inp" id="rfu"><option>Cotización</option><option>Cliente (verbal)</option><option>Licitación</option><option>Factura / orden de compra</option></select></label>
+      <label class="campo chk" style="align-self:end;margin-bottom:22px"><input type="checkbox" id="riva" checked>El precio incluye impuesto</label></div>
+      <div id="rInfo" class="nota" style="margin:-4px 0 12px"></div><div id="rErr"></div>
+      <button class="btn pri">Guardar cotización</button></form>`;
+    const info=()=>{const p=$('#rp').value,v=+$('#rv').value||1,cat=catDe(p,v),g=NEGOCIOS[PRODX[p].neg],pr=+$('#rpr').value;
+      const sin=pr?($('#riva').checked?pr/(1+IVA):pr):0,base=lista(p,$('#rm').value,cat);
+      $('#rInfo').innerHTML=`Categoría asignada: <b>${g.cats[cat]}</b> · Lista ${EMPRESA.split(' ')[0]}: <b>${usd(base,dec(p))}</b>${sin?` · Competidor sin impuesto: <b>${usd(sin,dec(p))}</b> ${delta(sin,base).replace('class="d','style="display:inline" class="d')}`:''}`};
+    ['rp','rv','rpr','riva','rm'].forEach(i=>$('#'+i).addEventListener('input',info));info();
+    $('#fr').onsubmit=e=>{e.preventDefault();
+      const p=$('#rp').value,v=+$('#rv').value,pr=+$('#rpr').value,cl=$('#rcl').value.trim(),py=$('#rpy').value.trim();
+      if(!pr||!v||!cl||!py){$('#rErr').innerHTML='<div class="err">Complete precio, volumen, cliente y proyecto.</div>';return}
+      const iva=$('#riva').checked,cat=catDe(p,v);
+      DB.cots.unshift({id:'COT-'+(600+DB.cots.length),fecha:$('#rf').value,comp:$('#rc').value,prod:p,mercado:$('#rm').value,cat,sin:+(iva?pr/(1+IVA):pr).toFixed(2),iva,vol:v,cliente:cl,proyecto:py,fuente:$('#rfu').value,por:USUARIO.nombre,nueva:true});
+      guardar();c={neg:PRODX[p].neg,mk:$('#rm').value,cat};tab='comp';pintar();aviso('Cotización guardada. Ya aparece en el comparador.')};
+  }
+  function historial(){
+    const ls=DB.cots.filter(q=>(!h.mk||q.mercado===h.mk)&&(!h.comp||q.comp===h.comp));
+    $('#pv',el).innerHTML=`<div class="filtros" style="margin-top:14px"><select class="inp" id="hm"><option value="">Todos los mercados</option>${MERCADOS.map(m=>`<option ${h.mk===m?'selected':''}>${m}</option>`).join('')}</select>
+      <select class="inp" id="hc"><option value="">Todos los competidores</option>${COMPETIDORES.map(x=>`<option ${h.comp===x?'selected':''}>${x}</option>`).join('')}</select><span class="nota" style="margin:0">${ls.length} cotizaciones</span></div>
+      <div class="hist">${ls.map(q=>{const base=lista(q.prod,q.mercado,q.cat);return `<article class="card hcard"><div><b>${esc(q.comp)} · ${esc(PRODX[q.prod].n)}</b>${q.nueva?' <span class="demo-tag">Nueva</span>':''}
+        <div class="sub">${q.fecha} · ${q.mercado} · ${NEGOCIOS[PRODX[q.prod].neg].cats[q.cat]} · ${fmt(q.vol)} ${PRODX[q.prod].u}</div><div class="sub">${esc(q.cliente)} — ${esc(q.proyecto)} · ${esc(q.fuente)}</div></div>
+        <div class="pr num">${usd(q.sin,dec(q.prod))}<small>${delta(q.sin,base).replace(/<\/?span[^>]*>/g,'')} vs. lista</small></div></article>`}).join('')}</div>`;
+    $('#hm',el).onchange=e=>{h.mk=e.target.value;historial()};$('#hc',el).onchange=e=>{h.comp=e.target.value;historial()};
+  }
+  function chat(){
+    if($('#chatFab'))return;
+    document.body.insertAdjacentHTML('beforeend',`<button class="chat-fab" id="chatFab" aria-label="Chat de soporte">${I.chat}</button>
+      <div class="card chat" id="chat" hidden><div class="chat-h">Soporte del estudio<small>Respuesta automática en la demo</small></div><div class="chat-m" id="chatM"></div>
+      <form id="chatF"><input class="inp" id="chatI" placeholder="Escriba su consulta" style="height:38px"><button class="btn pri sm" style="height:38px">Enviar</button></form></div>`);
+    const pinta=()=>{$('#chatM').innerHTML=[{de:'s',t:'Hola, Andrea. ¿En qué le ayudamos con el estudio de precios?'}].concat(DB.chat).map(m=>`<div class="bur ${m.de==='yo'?'yo':''}">${esc(m.t)}</div>`).join('');$('#chatM').scrollTop=1e6};
+    $('#chatFab').onclick=()=>{const c=$('#chat');c.hidden=!c.hidden;if(!c.hidden){pinta();$('#chatI').focus()}};
+    $('#chatF').onsubmit=e=>{e.preventDefault();const t=$('#chatI').value.trim();if(!t)return;DB.chat.push({de:'yo',t});$('#chatI').value='';pinta();
+      setTimeout(()=>{DB.chat.push({de:'s',t:'Gracias. En la app real, su consulta llega al responsable del estudio y le responde por aquí.'});guardar();pinta()},700)};
+  }
+  return {montar(e){el=e;el.classList.add('pad');pintar()},mostrar(e){el=e;pintar()}};
+})();
+/* =========================== Dashboard (datos ficticios) =========================== */
+VISTAS.dashboard=(function(){
+  let el,f={per:'ytd',neg:'',zona:''};
+  const NEG={Concreto:1.35e6,Bloques:.32e6,Prefabricados:.28e6,Agregados:.18e6};
+  const ZON={'Zona Norte':.55,'Zona Centro Sur':.37,'El Salvador':.08};
+  const EST=[.86,.9,1,1.02,1.05,1,.95,1.03,1.06,1.1,1.08,.98];
+  const REAL=[1.04,1.07,.97,1.06,1.09,1.03,.96,1.08,1.11,1.12];        // ene–oct 2026: casi todo sobre presupuesto
+  const FORE=[1.06,1.05];                                               // nov–dic: pronóstico
+  const HOY=10;                                                         // meses con dato real (ene–oct)
+  function serie(){
+    const r=rng(9+(f.neg||'t').length*7+(f.zona||'z').length*3);
+    const negs=f.neg?[f.neg]:Object.keys(NEG), zs=f.zona?ZON[f.zona]:1;
+    return EST.map((s,i)=>{const pres=negs.reduce((a,n)=>a+NEG[n],0)*s*zs;const ruido=1+(r()-.5)*.05;
+      return{pres,real:i<HOY?pres*REAL[i]*ruido:null,fore:i>=HOY?pres*FORE[i-HOY]:null,pers:pres*(.32+r()*.18)*(i>=HOY?1.25:.8)}});
+  }
+  function rango(){return f.per==='ytd'?[0,HOY]:f.per==='6m'?[HOY-6,HOY]:[HOY-3,HOY]}
+  const sum=(a,k)=>a.reduce((s,x)=>s+(x[k]||0),0);
+  function spark(vals,col){const mx=Math.max(...vals),mn=Math.min(...vals),w=120,h=30;const pts=vals.map((v,i)=>[i/(vals.length-1)*w,h-3-(v-mn)/((mx-mn)||1)*(h-6)]);
+    return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><path d="M${pts.map(p=>p.join(',')).join(' L')} L${w},${h} L0,${h}Z" fill="${col}" opacity=".14"/><path d="M${pts.map(p=>p.join(',')).join(' L')}" fill="none" stroke="${col}" stroke-width="2" vector-effect="non-scaling-stroke"/><circle cx="${pts[pts.length-1][0]}" cy="${pts[pts.length-1][1]}" r="3" fill="${col}"/></svg>`}
+  function nice(v){const p=Math.pow(10,Math.floor(Math.log10(v)));const n=v/p;return(n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p}
+  function barras(S){
+    const W=760,H=290,ml=54,mr=10,mt=10,mb=28,iw=W-ml-mr,ih=H-mt-mb;
+    const paso=nice(Math.max(...S.map(s=>Math.max(s.real||s.fore||0,s.pres,s.pers)))*1.05/4),mx=paso*4,y=v=>mt+ih-v/mx*ih,bw=iw/12;
+    let g='';for(let k=0;k<=4;k++){const v=mx*k/4;g+=`<line class="gr" x1="${ml}" x2="${W-mr}" y1="${y(v)}" y2="${y(v)}"/><text class="ax" x="${ml-8}" y="${y(v)+4}" text-anchor="end">${+(v/1e6).toFixed(2)} M</text>`}
+    const [a,b]=rango();
+    S.forEach((s,i)=>{const x=ml+i*bw,dim=(i<a||i>=b)&&i<HOY?' opacity=".35"':'';
+      const v=s.real!=null?s.real:s.fore;
+      g+=`<rect x="${x+bw*.14}" y="${y(v)}" width="${bw*.4}" height="${ih+mt-y(v)}" rx="3" fill="var(--mint)"${s.real==null?' fill-opacity=".45" stroke="var(--mint)" stroke-dasharray="3 2"':''}${dim}><title>${MESES[i]}: ${s.real!=null?'real':'pronóstico'} ${mill(v)}</title></rect>`;
+      g+=`<rect x="${x+bw*.56}" y="${y(s.pers)}" width="${bw*.28}" height="${ih+mt-y(s.pers)}" rx="2" fill="var(--sand)" fill-opacity=".85"${dim}><title>${MESES[i]}: perspectivas ${mill(s.pers)}</title></rect>`;
+      g+=`<text class="ax" x="${x+bw/2}" y="${H-8}" text-anchor="middle">${MESES[i]}</text>`});
+    g+=`<path d="${S.map((s,i)=>(i?'L':'M')+(ml+i*bw+bw/2)+','+y(s.pres)).join(' ')}" fill="none" stroke="var(--coral)" stroke-width="2.4"/>`+S.map((s,i)=>`<circle cx="${ml+i*bw+bw/2}" cy="${y(s.pres)}" r="3.2" fill="var(--surface)" stroke="var(--coral)" stroke-width="2"><title>${MESES[i]}: presupuesto ${mill(s.pres)}</title></circle>`).join('');
+    g+=`<line x1="${ml+HOY*bw}" x2="${ml+HOY*bw}" y1="${mt}" y2="${mt+ih}" stroke="var(--muted)" stroke-dasharray="4 4"/><text class="ax" x="${ml+HOY*bw+6}" y="${mt+12}">Pronóstico</text>`;
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Facturado real, presupuesto, pronóstico y perspectivas por mes">${g}</svg>`;
+  }
+  function dona(parts){let a=-Math.PI/2,g='';const R=52,r=32,cx=70,cy=70,tot=parts.reduce((s,p)=>s+p.v,0);
+    parts.forEach(p=>{const da=p.v/tot*Math.PI*2,b=a+da,l=da>Math.PI?1:0;
+      g+=`<path d="M${cx+R*Math.cos(a)},${cy+R*Math.sin(a)} A${R},${R} 0 ${l} 1 ${cx+R*Math.cos(b)},${cy+R*Math.sin(b)} L${cx+r*Math.cos(b)},${cy+r*Math.sin(b)} A${r},${r} 0 ${l} 0 ${cx+r*Math.cos(a)},${cy+r*Math.sin(a)}Z" fill="${p.c}"><title>${p.n}: ${Math.round(p.v/tot*100)}%</title></path>`;a=b});
+    return `<svg viewBox="0 0 140 140" style="max-width:150px">${g}</svg>`}
+  function pintar(){
+    const S=serie(),[a,b]=rango(),P=S.slice(a,b),real=sum(P,'real'),pres=sum(P,'pres'),cum=real/pres*100;
+    const anioR=sum(S,'real')+sum(S,'fore'),anioP=sum(S,'pres');
+    const ra=rng(31+(f.neg||'').length+(f.zona||'').length);
+    const rank=ASESORES.filter(x=>x.id!=='Andrea Lara'&&(!f.zona||x.z===f.zona)).map(x=>({n:x.n,v:Math.round(98+ra()*24)})).sort((p,q)=>q.v-p.v);
+    if(rank.length)rank[rank.length-1].v=Math.max(93,rank[rank.length-1].v-6);
+    const mix=[['Concreto','var(--mint)'],['Bloques','var(--sand)'],['Prefabricados','var(--coral)'],['Agregados','#5B8A99']].map(([n,c])=>({n,c,v:NEG[n]*(.95+ra()*.12)}));
+    const embudo=ESTADOS.map(e=>({e,n:DB.proyectos.filter(p=>p.estado===e&&(!f.zona||p.zona===f.zona)).length,v:DB.proyectos.filter(p=>p.estado===e&&(!f.zona||p.zona===f.zona)).reduce((s,p)=>s+p.vol,0)}));
+    const top=DB.proyectos.filter(p=>p.estado==='Perspectiva'&&(!f.zona||p.zona===f.zona)).sort((p,q)=>q.vol-p.vol).slice(0,5);
+    const mxE=Math.max(...embudo.map(x=>x.v));
+    el.innerHTML=`<div class="wrap">
+      <div class="cab"><div><h1>Dashboard comercial</h1><p>Facturado real contra presupuesto, pronóstico y perspectivas · 2026 · datos ficticios.</p></div>
+        <div class="filtros" style="margin:0">
+          <select class="inp" id="dp"><option value="ytd" ${f.per==='ytd'?'selected':''}>Ene – oct 2026</option><option value="6m" ${f.per==='6m'?'selected':''}>Últimos 6 meses</option><option value="3m" ${f.per==='3m'?'selected':''}>Último trimestre</option></select>
+          <select class="inp" id="dn"><option value="">Todos los negocios</option>${Object.keys(NEG).map(n=>`<option ${f.neg===n?'selected':''}>${n}</option>`).join('')}</select>
+          <select class="inp" id="dz"><option value="">Todas las zonas</option>${ZONAS.map(z=>`<option ${f.zona===z?'selected':''}>${z}</option>`).join('')}</select></div></div>
+      <div class="kpis">
+        <div class="card kpi"><small>Facturado real</small><b class="num">${mill(real)}</b><span class="var ${real>=pres?'up':'dn'}">${real>=pres?'▲':'▼'} ${Math.abs(cum-100).toFixed(1)}% vs. presupuesto</span>${spark(P.map(s=>s.real),'var(--mint)')}</div>
+        <div class="card kpi"><small>Presupuesto del período</small><b class="num">${mill(pres)}</b><span class="var" style="color:var(--muted)">${b-a} meses</span>${spark(P.map(s=>s.pres),'var(--coral)')}</div>
+        <div class="card kpi"><small>Cumplimiento</small><b class="num">${cum.toFixed(1)}%</b><span class="var ${cum>=100?'up':'dn'}">${P.filter(s=>s.real>=s.pres).length} de ${P.length} meses sobre meta</span>${spark(P.map(s=>s.real/s.pres),'var(--e-persp)')}</div>
+        <div class="card kpi"><small>Cierre 2026 (real + pronóstico)</small><b class="num">${mill(anioR)}</b><span class="var ${anioR>=anioP?'up':'dn'}">▲ ${((anioR/anioP-1)*100).toFixed(1)}% sobre presupuesto anual</span>${spark(S.map(s=>s.real||s.fore),'var(--mint)')}</div></div>
+      <div class="grid-d">
+        <div class="card panel-d"><h2>Facturado real vs. presupuesto vs. perspectivas</h2><p class="sub">Millones de USD por mes. Lo atenuado queda fuera del período elegido.</p>${barras(S)}
+          <div class="ley"><span><i style="background:var(--mint)"></i>Real</span><span><i style="background:color-mix(in srgb,var(--mint) 45%,transparent);outline:1px dashed var(--mint)"></i>Pronóstico</span><span><i style="background:var(--sand)"></i>Perspectivas</span><span><i style="background:var(--coral);height:3px"></i>Presupuesto</span></div></div>
+        <div class="card panel-d"><h2>Cumplimiento por asesor</h2><p class="sub">Real ÷ presupuesto del período. La línea marca el 100 %.</p>
+          <div class="rank">${rank.map(x=>`<div class="rank-f"><span>${x.n}</span><span class="barra"><i style="width:${Math.min(100,x.v/1.3)}%;background:${x.v>=100?'var(--mint)':'var(--sand)'}"></i></span><b class="num">${x.v}%</b></div>`).join('')}</div></div></div>
+      <div class="grid-d" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="card panel-d"><h2>Mezcla por negocio</h2><p class="sub">Participación en el facturado del período.</p>
+          <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">${dona(mix)}<div class="ley" style="flex-direction:column;gap:6px">${mix.map(m=>`<span><i style="background:${m.c}"></i>${m.n} · <b class="num" style="color:var(--fg)">${Math.round(m.v/mix.reduce((s,x)=>s+x.v,0)*100)}%</b></span>`).join('')}</div></div></div>
+        <div class="card panel-d"><h2>Embudo de proyectos</h2><p class="sub">Volumen en m³ por estado (viene de Mis proyectos).</p>
+          <div class="rank sin-meta">${embudo.map(x=>`<div class="rank-f" style="grid-template-columns:96px 1fr 70px"><span><span class="dot" style="display:inline-block;background:var(--e-${{Ganado:'ganado',Perspectiva:'persp',Competencia:'comp','Sin estado':'perdido'}[x.e]});margin-right:6px"></span>${x.e}</span><span class="barra"><i style="width:${x.v/mxE*100}%;background:var(--e-${{Ganado:'ganado',Perspectiva:'persp',Competencia:'comp','Sin estado':'perdido'}[x.e]})"></i></span><b class="num">${fmt(Math.round(x.v/1000))}k</b></div>`).join('')}</div></div>
+        <div class="card panel-d"><h2>Mayores perspectivas</h2><p class="sub">Los 5 proyectos más grandes por cerrar.</p>
+          <div class="rank">${top.map(p=>`<div style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;border-bottom:1px solid var(--line);padding-bottom:7px"><span style="min-width:0"><b>${esc(p.proyecto)}</b><br><span style="color:var(--muted)">${esc(p.zona)} · ${(AX[p.asesor]||AX['']).n}</span></span><b class="num" style="white-space:nowrap">${fmt(p.vol)} m³</b></div>`).join('')}</div></div></div>
+    </div>`;
+    $('#dp',el).onchange=e=>{f.per=e.target.value;pintar()};$('#dn',el).onchange=e=>{f.neg=e.target.value;pintar()};$('#dz',el).onchange=e=>{f.zona=e.target.value;pintar()};
+  }
+  return {montar(e){el=e;el.classList.add('pad');pintar()},mostrar(e){el=e;pintar()}};
+})();
+
+/* =========================== Arranque =========================== */
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(S&&!document.documentElement.dataset.theme)refrescarTodo()});
+if(S&&S.u===USUARIO.id)app();else login();
+})();
+</script>
+
+</body>
+</html>
