@@ -196,6 +196,12 @@
 .mapa-raiz .ficha .aviso{background:var(--warn-bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:11.5px}
 .mapa-raiz .ficha .acc{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
 .mapa-raiz .ficha .tags{display:flex;gap:4px;flex-wrap:wrap}
+/* Aislar la ficha de los estilos generales de la página (.ficha, .meses, .acc tienen otro uso fuera del mapa) */
+.mapa-raiz .ficha{position:static;inset:auto;width:auto;max-width:none;z-index:auto;padding:0;margin:0;background:none;border:0;box-shadow:none}
+.mapa-raiz .ficha h3{margin:0}
+.mapa-raiz .ficha .meses{height:auto;align-items:center;margin:0}
+.mapa-raiz .ficha .acc{border-bottom:0}
+.mapa-raiz .ficha .acc>button{width:auto;padding:7px 12px;font-size:12.5px}
 
 /* Celular: mapa a pantalla completa, filtros en panel inferior deslizable (dentro del área del módulo) */
 @media (max-width:760px){

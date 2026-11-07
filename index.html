@@ -441,7 +441,7 @@ VISTAS.mapa=(function(){
   window.MV={registrar(id,d){if(id==='mapa')def=d}};
   function cargar(){
     if(carga)return carga;
-    carga=new Promise((ok,mal)=>{const l=document.createElement('link');l.rel='stylesheet';l.href='mapa/mapa.css';document.head.appendChild(l);
+    carga=new Promise((ok,mal)=>{const l=document.createElement('link');l.rel='stylesheet';l.href='mapa/mapa.css?v=2';document.head.appendChild(l);
       const s=document.createElement('script');s.src='mapa/mapa.js';s.onload=()=>def?ok():mal(new Error('mapa'));s.onerror=()=>{carga=null;mal(new Error('red'))};document.body.appendChild(s)});
     return carga;
   }
