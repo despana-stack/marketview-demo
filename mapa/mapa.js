@@ -1,4 +1,4 @@
-/* MarketView (demo) — módulo «Mapa de mercado» (chat Mapa de mercado).
+/* MarketView — módulo «Mapa de mercado» (chat Mapa de mercado).
  *
  * Proyectos (Ganado, Perspectiva, Competencia…), plantas propias y de la competencia, radio de 20 km, calor de demanda,
  * clientes de bloques, terrenos y geocercas de asesores. Datos: ctx.api('mapa.cargar') → apps-script/Mapa.gs.

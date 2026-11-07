@@ -1,4 +1,3 @@
-# MarketView · Demo
+# MarketView
 
-Demostración de MarketView con una empresa ficticia («Calixa Materiales»). Los nombres de proyectos, clientes, asesores y competidores son inventados, y las cifras y los precios son de ejemplo.
-No se conecta a ningún servidor: lo que se registra queda solo en el navegador de quien la usa.
+MarketView: inteligencia de mercado para «Calixa Materiales» (mapa de proyectos, mis proyectos, estudio de precios y dashboard).

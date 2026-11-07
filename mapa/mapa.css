@@ -1,4 +1,4 @@
-/* Duracreto MarketView — módulo «Mapa de mercado» (chat Mapa de mercado).
+/* MarketView — módulo «Mapa de mercado» (chat Mapa de mercado).
    Todo va dentro de .mapa-raiz para no chocar con otros módulos. Usa las variables de core.css. */
 .mapa-raiz{
   --mapa-ganado:#1E9E57; --mapa-perspectiva:#E8AE00; --mapa-competencia:#D93025; --mapa-perdido:#6B6B68; --mapa-sinestado:#A0A19F;

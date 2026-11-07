@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0E2A36">
 <meta name="robots" content="noindex">
-<title>MarketView Demo</title>
+<title>MarketView</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: banda superior azul petróleo con el menú (en celular, barra inferior); cada módulo ocupa el área restante.
-   Empresa ficticia «Calixa Materiales». Paleta propia (no es la de Duracreto): petróleo, menta, coral. */
+   «Calixa Materiales». Paleta propia: petróleo, menta, coral. */
 :root{
   --navy:#0E2A36; --navy2:#16394A; --mint:#2EC4A6; --mint-ink:#0B7A66; --coral:#FF7A59; --sand:#F2B544;
   --bg:#F3F6F7; --surface:#FFFFFF; --surface2:#E8EEF0; --fg:#10232C; --muted:#5B6E77; --line:#D3DEE2;
@@ -71,7 +71,7 @@ textarea.inp{height:auto;min-height:70px;padding:10px 13px}
 .login .pie{margin:14px 0 0;font-size:12px;color:var(--muted);text-align:center}
 
 /* ---------- Encabezado y menú ---------- */
-.top{position:fixed;top:0;left:0;right:0;height:var(--top-h);padding-top:env(safe-area-inset-top,0px);padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px));
+header.top{position:fixed;top:0;left:0;right:0;height:var(--top-h);padding-top:env(safe-area-inset-top,0px);padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px));
   background:var(--navy);color:#E7F0F2;display:flex;align-items:center;gap:12px;z-index:40}
 .marca{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
 .marca svg{width:32px;height:32px;flex:none}
@@ -273,10 +273,10 @@ table.comp{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;m
 (function(){
 'use strict';
 /* =====================================================================
-   MarketView · DEMO con datos ficticios. Empresa, país, ciudades, personas,
-   competidores y cifras son inventados. No se conecta a ningún servidor.
+   MarketView · Calixa Materiales.
+   Funciona sin servidor: los datos quedan en el navegador.
    ===================================================================== */
-const USUARIO = { id:'andrea.lara', clave:'Calixa2026', nombre:'Andrea Lara', cargo:'Gerente comercial (demo)' };
+const USUARIO = { id:'andrea.lara', clave:'Calixa2026', nombre:'Andrea Lara', cargo:'Gerente comercial' };
 const $ = (s,r)=>(r||document).querySelector(s);
 const $$ = (s,r)=>Array.from((r||document).querySelectorAll(s));
 const esc = s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -286,7 +286,7 @@ const fmt = n=>Number(n).toLocaleString('en-US');
 function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 
-/* ---------- Geografía ficticia (República de Calixa) ---------- */
+/* ---------- Geografía ---------- */
 const CIUDADES=[
   {id:'sps',n:'San Pedro Sula',z:'Zona Norte',lat:15.5058,lng:-88.0258},{id:'cho',n:'Choloma',z:'Zona Norte',lat:15.6055,lng:-87.9559},
   {id:'vil',n:'Villanueva',z:'Zona Norte',lat:15.4008,lng:-88.0045},{id:'pc',n:'Puerto Cortés',z:'Zona Norte',lat:15.8251,lng:-87.9286},
@@ -307,7 +307,7 @@ const estK=e=>String(e).replace(/\s/g,'');
 const TIPOS=['Vertical','Horizontal','Industrial','Vial','Otro'];
 const MESES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 
-/* ---------- Proyectos ficticios ---------- */
+/* ---------- Proyectos ---------- */
 function semillaProyectos(){return JSON.parse(JSON.stringify(DM.proyectos))}
 function semillaAsesores(){return JSON.parse(JSON.stringify(DM.asesores))}
 
@@ -378,12 +378,11 @@ function temaActual(){return document.documentElement.dataset.theme||(matchMedia
 function login(err){
   $('#app').innerHTML=`<main class="login"><form class="login-card" id="fLogin" novalidate>
     <div class="logo"><span class="logo-mark">${MARCA}</span><div><b>Market<span>View</span></b><small>${EMPRESA} · Inteligencia de mercado</small></div></div>
-    <p style="margin:0 0 16px"><span class="demo-tag">Demo · datos ficticios</span></p>
     ${err?`<div class="err" role="alert">${esc(err)}</div>`:''}
     <label class="campo"><span>Usuario</span><input class="inp" id="lu" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="nombre.apellido"></label>
     <label class="campo"><span>Contraseña</span><input class="inp" id="lp" type="password" autocomplete="current-password"></label>
     <button class="btn pri ancho" type="submit">Ingresar</button>
-    <p class="pie">Versión de demostración. Nada de lo que haga aquí se guarda en un servidor.</p></form></main>`;
+    </form></main>`;
   $('#lu').focus();
   $('#fLogin').onsubmit=e=>{e.preventDefault();
     const u=$('#lu').value.trim().toLowerCase(),p=$('#lp').value;
@@ -393,7 +392,7 @@ function login(err){
 
 function app(){
   $('#app').innerHTML=`<header class="top">
-      <div class="marca">${MARCA}<b><span class="app">MarketView</span><span class="mod-t" id="tit"></span></b><span class="demo-tag tag">Demo</span></div>
+      <div class="marca">${MARCA}<b><span class="app">MarketView</span><span class="mod-t" id="tit"></span></b></div>
       <nav class="nav" id="nav" aria-label="Módulos">${MODS.map(m=>`<button data-m="${m.id}" title="${m.l}"><span class="ic">${I[m.id]}</span><em style="font-style:normal">${m.n}</em></button>`).join('')}</nav>
       <div class="top-acc"><button class="yo" id="yo" aria-label="Menú de usuario">AL</button></div>
     </header><main id="main"></main>`;
@@ -426,17 +425,17 @@ function menu(){
   document.body.insertAdjacentHTML('beforeend',`<div class="capa" id="capa"></div><div class="menu" id="menu" role="dialog" aria-label="Menú de usuario">
     <div class="menu-h"><b>${USUARIO.nombre}</b><small>${USUARIO.cargo}</small><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="chip">Mapa: Editor</span><span class="chip">Precios: Editor</span></div></div>
     <button class="mi" id="mTema">Modo oscuro<span class="st">${dark?'Activado':'Desactivado'}</span></button>
-    <button class="mi" id="mReset">Restablecer datos de la demo</button>
+    <button class="mi" id="mReset">Restablecer datos</button>
     <button class="mi" id="mSalir" style="color:var(--bad)">Cerrar sesión</button></div>`);
   $('#capa').onclick=cerrarCapas;
   $('#mTema').onclick=()=>{const n=temaActual()==='dark'?'light':'dark';document.documentElement.dataset.theme=n;store.set('mvdemo_tema',n);cerrarCapas();refrescarTodo()};
-  $('#mReset').onclick=()=>{store.del(K);DB={proyectos:semillaProyectos(),asesores:semillaAsesores(),cots:semillaCotizaciones(),chat:[]};cerrarCapas();refrescarTodo();aviso('Se restablecieron los datos de la demo.')};
+  $('#mReset').onclick=()=>{store.del(K);DB={proyectos:semillaProyectos(),asesores:semillaAsesores(),cots:semillaCotizaciones(),chat:[]};cerrarCapas();refrescarTodo();aviso('Se restablecieron los datos.')};
   $('#mSalir').onclick=()=>{store.del('mvdemo_sesion');S=null;cerrarCapas();login()};
 }
 function cerrarCapas(){['#capa','#menu','#dlg'].forEach(s=>{const x=$(s);if(x)x.remove()})}
 function refrescarTodo(){$$('#main>.mod').forEach(s=>s.remove());$('#chat')&&$('#chat').remove();$('#chatFab')&&$('#chatFab').remove();ir(actual||'mapa')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrarCapas()});
-/* =========================== Mapa (módulo real de MarketView, datos de demo) =========================== */
+/* =========================== Mapa =========================== */
 VISTAS.mapa=(function(){
   let def=null,carga=null;
   window.MV={registrar(id,d){if(id==='mapa')def=d}};
@@ -452,9 +451,9 @@ VISTAS.mapa=(function(){
     api:async(acc,args)=>{
       await new Promise(r=>setTimeout(r,250));
       if(acc==='mapa.cargar')return datos();
-      if(acc==='mapa.moverProyecto'){const p=DB.proyectos.find(x=>x.id===args.id);if(p){p.lat=+args.lat;p.lng=+args.lng;p.aprox='No – ajustada en el mapa (demo)';guardar()}return{datos:datos()}}
+      if(acc==='mapa.moverProyecto'){const p=DB.proyectos.find(x=>x.id===args.id);if(p){p.lat=+args.lat;p.lng=+args.lng;p.aprox='No – ajustada en el mapa';guardar()}return{datos:datos()}}
       if(acc==='mapa.guardarGeocerca'){const a=(DB.asesores||[]).find(x=>x.nombre===args.nombre);if(a){a.geocerca=args.puntos&&args.puntos.length?args.puntos:null;guardar()}return{datos:datos()}}
-      const e=new Error('No disponible en la demo.');e.codigo='accion';throw e;
+      const e=new Error('Esta función no está disponible.');e.codigo='accion';throw e;
     },
     aviso:aviso,abrir:(m,p)=>{p=p||{};if(m==='proyectos'&&p.editar)VISTAS.proyectos.editar=p.editar;const q=new URLSearchParams(p).toString();location.hash=m+(q&&m==='mapa'?'?'+q:'')},
     tema:temaActual,esCelular:()=>innerWidth<1024,demo:true,version:'demo'}}
@@ -539,7 +538,7 @@ VISTAS.proyectos=(function(){
       const mover=n||c.id!==ciu,a=Math.random()*6.28,r=.01+Math.random()*.03;
       if(mover){d.lat=+(c.lat+Math.sin(a)*r).toFixed(5);d.lng=+(c.lng+Math.cos(a)*r).toFixed(5);d.zona=c.z;d.pais=c.z==='El Salvador'?'El Salvador':'Honduras';d.planta=plantaCercana(d.lat,d.lng);d.aprox='Sí – en el centro de '+c.n}
       const m={};for(let k=0;k<d.plazo;k++){const t=new Date(+d.mes.slice(0,4),+d.mes.slice(5)-1+k,1);m[t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')]=Math.round(d.vol/d.plazo*10)/10}d.m=m;
-      if(n){Object.assign(d,{id:'PRY-'+String(DB.proyectos.length+1).padStart(4,'0'),asesor:'Andrea Lara',comp:'',negocio:'concreto',segmento:'Privado',fuente:'Mis proyectos (demo)'});DB.proyectos.unshift(d)}
+      if(n){Object.assign(d,{id:'PRY-'+String(DB.proyectos.length+1).padStart(4,'0'),asesor:'Andrea Lara',comp:'',negocio:'concreto',segmento:'Privado',fuente:'Mis proyectos'});DB.proyectos.unshift(d)}
       else Object.assign(p,d);
       guardar();cerrarCapas();pintar();aviso(n?'Proyecto registrado: '+d.proyecto+'.':'Cambios guardados.')};
     $('#dCl').focus();
@@ -618,7 +617,7 @@ VISTAS.precios=(function(){
   function chat(){
     if($('#chatFab'))return;
     document.body.insertAdjacentHTML('beforeend',`<button class="chat-fab" id="chatFab" aria-label="Chat de soporte">${I.chat}</button>
-      <div class="card chat" id="chat" hidden><div class="chat-h">Soporte del estudio<small>Respuesta automática en la demo</small></div><div class="chat-m" id="chatM"></div>
+      <div class="card chat" id="chat" hidden><div class="chat-h">Soporte del estudio<small>Respuesta automática</small></div><div class="chat-m" id="chatM"></div>
       <form id="chatF"><input class="inp" id="chatI" placeholder="Escriba su consulta" style="height:38px"><button class="btn pri sm" style="height:38px">Enviar</button></form></div>`);
     const pinta=()=>{$('#chatM').innerHTML=[{de:'s',t:'Hola, Andrea. ¿En qué le ayudamos con el estudio de precios?'}].concat(DB.chat).map(m=>`<div class="bur ${m.de==='yo'?'yo':''}">${esc(m.t)}</div>`).join('');$('#chatM').scrollTop=1e6};
     $('#chatFab').onclick=()=>{const c=$('#chat');c.hidden=!c.hidden;if(!c.hidden){pinta();$('#chatI').focus()}};
@@ -627,7 +626,7 @@ VISTAS.precios=(function(){
   }
   return {montar(e){el=e;el.classList.add('pad');pintar()},mostrar(e){el=e;pintar()}};
 })();
-/* =========================== Dashboard (datos ficticios) =========================== */
+/* =========================== Dashboard =========================== */
 VISTAS.dashboard=(function(){
   let el,f={per:'ytd',neg:'',zona:''};
   const NEG={Concreto:1.35e6,Bloques:.32e6,Prefabricados:.28e6,Agregados:.18e6};
@@ -676,7 +675,7 @@ VISTAS.dashboard=(function(){
     const top=DB.proyectos.filter(p=>p.estado==='Perspectiva'&&(!f.zona||p.zona===f.zona)).sort((p,q)=>q.vol-p.vol).slice(0,5);
     const mxE=Math.max(...embudo.map(x=>x.v));
     el.innerHTML=`<div class="wrap">
-      <div class="cab"><div><h1>Dashboard comercial</h1><p>Facturado real contra presupuesto, pronóstico y perspectivas · 2026 · datos ficticios.</p></div>
+      <div class="cab"><div><h1>Dashboard comercial</h1><p>Facturado real contra presupuesto, pronóstico y perspectivas · 2026.</p></div>
         <div class="filtros" style="margin:0">
           <select class="inp" id="dp"><option value="ytd" ${f.per==='ytd'?'selected':''}>Ene – oct 2026</option><option value="6m" ${f.per==='6m'?'selected':''}>Últimos 6 meses</option><option value="3m" ${f.per==='3m'?'selected':''}>Último trimestre</option></select>
           <select class="inp" id="dn"><option value="">Todos los negocios</option>${Object.keys(NEG).map(n=>`<option ${f.neg===n?'selected':''}>${n}</option>`).join('')}</select>
